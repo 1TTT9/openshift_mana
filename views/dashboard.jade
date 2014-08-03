@@ -1,0 +1,129 @@
+doctype html
+html
+  head
+    meta(charset='utf-8')
+    title #{locals.title}
+    script(type='text/javascript', src='/js/utils/jquery.min.js')
+    script(type='text/javascript', src='/js/utils/underscore-min.js')
+    script(type='text/javascript', src='/js/utils/backbone-min.js')
+    script(type='text/javascript', src='/js/utils/handlebars.js')
+
+  body
+    div#sidebar
+      div#new-install-overlay
+      div#sidebar-top
+        a(href='#/')
+          div#sidebar-logo
+        div#sidebar-app-select
+          div.logo
+          div.text Mana
+      div#sidebar-menu
+        a(herf='#/').item.active
+          div.logo.dashboard
+          div.text(data-localize='sidebar.dashboard') dashboard
+        a(herf='#/').item#analytics-menu
+          div.logo.analytics
+          div.text(data-localize='sidebar.analytics') analytics
+        a.item#management-menu
+          div.logo.management
+          div.text(data-localize='sidebar.management') management
+        a.item#sidebar-events
+          div.logo.events
+          div.text(data-localize='sidebar.events') events
+        a.item#sidebar-reports
+          div.logo.reports
+          div.text(data-localize='sidebar.reports') reports
+
+      div#sidebar-bottom-container
+        div.menu
+          a.item#account-settings(data-localize='sidebar.settings')
+          a.item#user-logout(href='/logout' data-localize='sizebar.logout')
+        div#language-menu
+          div.group
+            a.item(data-language-code='de') Deutsch
+            a.item(data-language-code='en') English
+            a.item(data-language-code='it') Italiano
+          div.group
+            a.item(data-language-code='zh') 中文
+            a.item(data-language-code='ja') 日本語
+
+
+    div#app-nav
+      div#app-nav-head
+        div#app-nav-title
+        div.button-container
+          div.icon-button.dark.help-zone-vs#sort-app-button
+            div.icon
+      div.apps-scrollable
+      div#sidebar-new-app
+        div.app-container.app-navigate
+          div.logo
+          div.name
+          div.drag
+
+
+    div#content-container
+      div#content-top
+      div#content
+        div#content-loader
+
+
+    div#date-selector.help-zone-vs
+      #date-picker-button.calendar
+        #date-picker
+          .tip
+          .calendar-container
+            #date-from.calendar
+            #date-to.calendar
+          .button-container
+            #date-submit.cly-button-dark(style='float: right;', data-localize='common.apply')
+        #month.button.date-selector
+        #day.button.date-selector
+        #yesterday.button.date-selector
+        #hour.button.date-selector(data-localize='common.today')
+        #7days.button.date-selector(data-localize='common.7days')
+        #30days.button.date-selector(data-localize='common.30days')
+        #60days.button.date-selector(data-localize='common.60days')
+
+
+    Script#dashboard-template(type='text/x-handlebars-template')
+      .widget
+        .widget-header
+          .title {{page-title}}
+        .widget-content
+          #big-numbers-container.dashboard
+            | {{#each usage}}
+            .big-numbers.six-column.help-zone-vs(data-help-localize='{{this.help}}')
+              .inner
+                .logo
+                .number 
+                  | {{this.data.total}}
+                .trend(style="background-image:url('/images/dashboard/{{this.data.trend}}trend.png');")
+                  .change  {{this.data.change}}
+                .select
+                  .title  {{this.title}}
+                .arrow
+            | {{/each}}
+        .widget-footer
+          #dashboard-graph.graph
+      .dashboard-summary
+        | {{#each bars}}
+        .item.help-zone-vs(data-help-localize='{{this.help}}')
+          .inner
+            .title  {{this.title}}
+            .no-data(data-localize='common.bar.no-data')
+        | {{/each}}
+      .widget.map-list.help-zone-vb
+        | {{#if country-data}}
+        .map-list-right
+          | {{#each country-data}}
+          .map-list-item
+            .flag
+            .country-name
+            .total
+          | {{/each}}
+        | {{/if}}
+        #geo-char-outer
+
+    Script(type='text/javascript', src='/js/mana/template.js')
+    link(rel='stylesheet', href='/styl/dashboard.css')

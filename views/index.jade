@@ -1,0 +1,23 @@
+doctype html
+html
+  head
+    meta(charset='utf-8')
+    title #{server.title}
+    link(rel='stylesheet', href='/styl/layout.css')
+    script(type='text/javascript', src='/js/utils/jquery.min.js')
+
+  body
+    label.viewer Message from zerorpc(Python): #{server.greeting}
+
+    object.swfpos#StrokeExercisePanel(classid='clsid:D27CDB6E-AE6D-11cf-96B8-444553540000', width='350', height='471', codebase='http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab')
+      param(name='movie', value='http://stroke-order.learningweb.moe.edu.tw/StrokeExercisePanel.swf')
+      param(name='quality', value='high')
+      param(name='bgcolor', value='#ffffff')
+      param(name='allowScriptAccess', value='sameDomain')
+      param(name='allowFullScreen', value='true')
+      param(name='flashVars', value='penSize=45&StrokeDefURL=http://stroke-order.learningweb.moe.edu.tw/provideStrokeInfo.do?big5=C4D0%26useAlt=0&EvtReportURL=http://stroke-order.learningweb.moe.edu.tw/wrongStrokeOrder.do?big5=C4D0&locale=zh_TW&wavURL=http://stroke-order.learningweb.moe.edu.tw/')
+      embed(src='http://stroke-order.learningweb.moe.edu.tw/StrokeExercisePanel.swf', quality='high', bgcolor='#869ca7', width='350', height='471', name='StrokeExercisePanel', align='middle', play='true', loop='false', allowscriptaccess='sameDomain', type='application/x-shockwave-flash', allowfullscreen='true', flashvars='penSize=45&StrokeDefURL=http://stroke-order.learningweb.moe.edu.tw/provideStrokeInfo.do?big5=C4D0%26useAlt=0&EvtReportURL=http://stroke-order.learningweb.moe.edu.tw/wrongStrokeOrder.do?big5=C4D0&locale=zh_TW&wavURL=http://stroke-order.learningweb.moe.edu.tw/', pluginspage='http://www.adobe.com/go/getflashplayer')
+
+    footer
+      p  Website Design © Express | Node.JS | OpenShift | GGC All rights reserved. 2014-2016
+
