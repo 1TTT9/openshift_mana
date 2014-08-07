@@ -1,0 +1,29 @@
+doctype html
+html
+  head
+    meta(charset='utf-8')
+    //link(rel='stylesheet', href='/styl/layout.css')
+    link(rel='stylesheet', href='/styl/jquery-ui.custom.min.css')
+    script(type='text/javascript', src='/js/utils/jquery.min.js')
+    script(type='text/javascript', src='/js/utils/jquery-ui.custom.min.js')
+
+  body
+    -if (!everyauth.loggedIn)
+      #popup
+        .label(for='user') username : 
+        input.user(type='text')
+        br
+        .label(for='pass') password : 
+        input.pass(type='text')
+
+      form#login-form(action='/login', method='POST')
+        input.user(type='text' name='login')
+        input.pass(type='text' name='pass')
+        input(type='submit')
+    -else
+       h2 Authenticated
+       label#aaaa
+
+    script(type='text/javascript', src='/js/mana/auth.js')
+
+

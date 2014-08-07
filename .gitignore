@@ -47,7 +47,8 @@ nosetests.xml
 node_modules
 create_defaults.sh
 /public/images
+/public/styl/images
 package.json
 
 #others
-config.js
+configs.js

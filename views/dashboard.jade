@@ -4,9 +4,24 @@ html
     meta(charset='utf-8')
     title #{locals.title}
     script(type='text/javascript', src='/js/utils/jquery.min.js')
+    script(type='text/javascript', src='/js/utils/moment.min.js')
+    script(type='text/javascript', src='/js/utils/moment+locales.min.js')
+    script(type='text/javascript', src='/js/utils/store+json2.min.js')
     script(type='text/javascript', src='/js/utils/underscore-min.js')
     script(type='text/javascript', src='/js/utils/backbone-min.js')
     script(type='text/javascript', src='/js/utils/handlebars.js')
+
+    script(language='javascript', type='text/javascript', src='/js/visuo/jquery.peity.min.js')
+    script(language='javascript', type='text/javascript', src='/js/visuo/flot/jquery.flot.js')
+    script(language='javascript', type='text/javascript', src='/js/visuo/flot/jquery.flot.tickrotor.js')
+    script(language='javascript', type='text/javascript', src='/js/visuo/flot/jquery.flot.pie.min.js')
+    script(language='javascript', type='text/javascript', src='/js/visuo/flot/jquery.flot.resize.js')
+    script(language='javascript', type='text/javascript', src='/js/visuo/flot/jquery.flot.stack.js')
+    script(language='javascript', type='text/javascript', src='/js/visuo/gauge.min.js')
+    script(language='javascript', type='text/javascript', src='/js/visuo/d3/d3.min.js')
+    script(language='javascript', type='text/javascript', src='/js/visuo/d3/d3.layout.min.js')
+    script(language='javascript', type='text/javascript', src='/js/visuo/rickshaw/rickshaw.min.js')
+
 
   body
     div#sidebar
@@ -68,8 +83,9 @@ html
         div#content-loader
 
 
-    div#date-selector.help-zone-vs
-      #date-picker-button.calendar
+    Script#template-date-selector(type='text/x-handlebars-template')
+      div#date-selector.help-zone-vs
+        #date-picker-button.calendar
         #date-picker
           .tip
           .calendar-container
@@ -78,8 +94,6 @@ html
           .button-container
             #date-submit.cly-button-dark(style='float: right;', data-localize='common.apply')
         #month.button.date-selector
-        #day.button.date-selector
-        #yesterday.button.date-selector
         #hour.button.date-selector(data-localize='common.today')
         #7days.button.date-selector(data-localize='common.7days')
         #30days.button.date-selector(data-localize='common.30days')
@@ -89,7 +103,8 @@ html
     Script#dashboard-template(type='text/x-handlebars-template')
       .widget
         .widget-header
-          .title {{page-title}}
+          .title(style='letter-spacing:-1px; font-size:19px; margin-top:10px; margin-left:5px;') {{page-title}} 
+          | {{> date-selector}}
         .widget-content
           #big-numbers-container.dashboard
             | {{#each usage}}
@@ -104,8 +119,9 @@ html
                   .title  {{this.title}}
                 .arrow
             | {{/each}}
-        .widget-footer
-          #dashboard-graph.graph
+        .widget-footer(style='height:220px; padding-top:20px; padding-bottom:10px; overflow:visible; box-shadow:none;')
+          #dashboard-graph.graph(style='height:100%; margin-left:-10px;')
+
       .dashboard-summary
         | {{#each bars}}
         .item.help-zone-vs(data-help-localize='{{this.help}}')
@@ -125,5 +141,9 @@ html
         | {{/if}}
         #geo-char-outer
 
+    Script(type='text/javascript', src='/js/mana/mana.config.js')
+    Script(type='text/javascript', src='/js/mana/mana.graph.js')    
+    Script(type='text/javascript', src='/js/mana/mana.common.js')
+    Script(type='text/javascript', src='/js/mana/mana.session.js')
     Script(type='text/javascript', src='/js/mana/template.js')
     link(rel='stylesheet', href='/styl/dashboard.css')

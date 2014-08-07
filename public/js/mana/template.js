@@ -1,4 +1,10 @@
 
+//random string generator
+function makeRandom() {
+    var text = "", possible = "0123456789", len = Math.floor(Math.random() * 4)+1;
+    for( var i=0; i < len; i++ ) text += possible.charAt(Math.floor(Math.random() * possible.length));
+    return text;
+}
 
 var manaView = Backbone.View.extend( {
 
@@ -66,6 +72,97 @@ var manaView = Backbone.View.extend( {
 /* fillKeyEvents funciton */
 /* fillKeyEvents funciton END */
 
+window.manageAppsView = manaView.extend({
+
+    initialize: function (){
+	this.template = Handlebars.compile( $('#template-management-applications').html() ) ;
+    },
+
+    renderCommon: function (){
+	$(this.el).html(
+	    this.template({addmin_app: manaGlobal['admin_apps']})
+	);
+
+	var appId = 'TEMP_APP_ID';
+	$('#app-management-bar .app-container').removeClass('active');
+	$('#app-management-bar .app-container[data-id="' + appId + '"]').addClass('active');
+
+
+	function resetAdd() {
+            $("#app-add-name").val("");
+            $("#app-add-category").text('NOCATEGORY');
+            $("#app-add-category").data("value", "");
+            $("#app-add-timezone #selected").text("");
+            $("#app-add-timezone #selected").hide();
+            $("#app-add-timezone .text").html('NOTIMEZONE');
+            $("#app-add-timezone .text").data("value", "");
+            $("#app-add-timezone #app-timezone").val("");
+            $("#app-add-timezone #app-country").val("");
+            $("#app-add-timezone #timezone-select").hide();
+            $(".required").hide();	    
+
+	}
+
+	function hideAdd() {
+	    $('#app-container-new').remove();
+	    $('#add-new-app').hide();
+	    resetAdd();
+	    $('#view-app').show();
+	}
+
+
+	function initAppManagement(appId) {
+	    if (jQuery.isEmptyObject(manaGlobal['apps'])) {
+		//showAdd();
+		$('#no-app-warning').show();
+		return false
+	    } else if (jQuery.isEmptyObject(manaGlobal['admin_apps'])) {
+		//showAdd();
+		return false;
+	    } else {
+		hideAdd();
+		if (manaGlobal['admin_apps'][appId]) {
+		    $('#delete-app').show();
+		} else {
+		    $('#delete-app').hide();
+		}
+	    }
+
+            $("#app-edit-id").val(appId);
+            $("#view-app").find(".widget-header .title").text(manaGlobal['apps'][appId].name);
+            $("#app-edit-name").find(".read").text(manaGlobal['apps'][appId].name);
+            $("#app-edit-name").find(".edit input").val(manaGlobal['apps'][appId].name);
+            $("#view-app-key").text(manaGlobal['apps'][appId].key);
+            $("#view-app-id").text(appId);
+	    /*
+            $("#app-edit-category").find(".cly-select .text").text(appCategories[manaGlobal['apps'][appId].category]);
+            $("#app-edit-category").find(".cly-select .text").data("value", manaGlobal['apps'][appId].category);
+            $("#app-edit-timezone").find(".cly-select .text").data("value", countlyGlobal['apps'][appId].timezone);
+            $("#app-edit-category").find(".read").text(appCategories[countlyGlobal['apps'][appId].category]);
+            $("#app-edit-image").find(".read .logo").css({"background-image":'url("/appimages/' + appId + '.png")'});
+            var appTimezone = timezones[countlyGlobal['apps'][appId].country];
+            for (var i = 0; i < appTimezone.z.length; i++) {
+                for (var tzone in appTimezone.z[i]) {
+                    if (appTimezone.z[i][tzone] == countlyGlobal['apps'][appId].timezone) {
+                        var appEditTimezone = $("#app-edit-timezone").find(".read"),
+                            appCountryCode = countlyGlobal['apps'][appId].country;
+                        appEditTimezone.find(".flag").css({"background-image":"url(/images/flags/" + appCountryCode.toLowerCase() + ".png)"});
+                        appEditTimezone.find(".country").text(appTimezone.n);
+                        appEditTimezone.find(".timezone").text(tzone);
+                        initCountrySelect("#app-edit-timezone", appCountryCode, tzone, appTimezone.z[i][tzone]);
+                        break;
+                    }
+                }
+            }
+	    */
+	}
+
+	initAppManagement(appId);	
+    },
+
+});
+
+
 
 
 window.DashboardView = manaView.extend({
@@ -88,8 +185,15 @@ window.DashboardView = manaView.extend({
     dateChanged: function (){
 
 	this.renderCommon(false, true);
+	
 	switch (this.selectedView) {
-	    //pass
+        case "#draw-total-sessions":
+            _.defer(function () {
+                sessionDP = manaSession.getSessionDPTotal();
+                manaGraph.drawTimeGraph(sessionDP.chartDP, "#dashboard-graph");
+		//alert('lalala2');
+            });
+            break;
 	}
     },
 
@@ -101,50 +205,66 @@ window.DashboardView = manaView.extend({
     /*  appChanged here */
 
     
-    renderCommon: function (){
-	
-	var sessionData = {
-	    "page-title": "hehe, I am here!",
-	    "usage": [
-		{
-		    'title': 'a1',
-		    'data': {'trend':'d', 'total':'1000K', 'change':'-100%'},
-		    'id': '001',
-		    'help': ''
-		},
-		{
-		    'title': 'a2',
-		    'data': {'trend':'u', 'total':'1000K', 'change':'100%'},
-		    'id': '002',
-		    'help': ''
-		},
-		{
-		    'title': 'a3',
-		    'data': {'trend':'d', 'total':'1000K', 'change':'-100%'},
-		    'id': '003',
-		    'help': ''
-		},
-		{
-		    'title': 'a4',
-		    'data': {'trend':'u', 'total':'1000K', 'change':'100%'},
-		    'id': '004',
-		    'help': ''
-		},
-		{
-		    'title': 'a5',
-		    'data': {'trend':'d', 'total':'1000K', 'change':'-100%'},
-		    'id': '005',
-		    'help': ''
-		},
-		{
-		    'title': 'a6',
-		    'data': {'trend':'u', 'total':'1000K', 'change':'100%'},
-		    'id': '006',
-		    'help': ''
-		}
-	    ],
+    renderCommon: function (isRefresh, isDateChange){
 
-	    'bars': [
+        var sessionData = manaSession.getSessionData();
+            //locationData = manaLocation.getLocationData({maxCountries:7}),
+            //sessionDP = manaSession.getSessionDPTotal();
+
+        //sessionData["country-data"] = locationData;
+        //sessionData["page-title"] = manaCommon.getDateRange();
+
+	/* Deprecation warning: moment.lang is deprecated. Use moment.locale instead. */
+	moment.locale('ja');
+        sessionData["page-title"] = moment().format('lll') + moment().format('ss秒 (dd)') ;
+
+        sessionData["usage"] = [
+            {
+                //"title":jQuery.i18n.map["common.total-sessions"],
+                "title":"total-sessions",
+                "data":sessionData.usage['total-sessions'],
+                "id":"draw-total-sessions",
+                "help":"dashboard.total-sessions"
+            },
+            {
+                //"title":jQuery.i18n.map["common.total-users"],
+                "title":"total-users",
+                "data":sessionData.usage['total-users'],
+                "id":"draw-total-users",
+                "help":"dashboard.total-users"
+            },
+            {
+                //"title":jQuery.i18n.map["common.new-users"],
+                "title":"new-users",
+                "data":sessionData.usage['new-users'],
+                "id":"draw-new-users",
+                "help":"dashboard.new-users"
+            },
+            {
+                //"title":jQuery.i18n.map["dashboard.time-spent"],
+                "title":"time-spent",
+                "data":sessionData.usage['total-duration'],
+                "id":"draw-total-time-spent",
+                "help":"dashboard.total-time-spent"
+            },
+            {
+                //"title":jQuery.i18n.map["dashboard.avg-time-spent"],
+                "title":"avg-time-spent",
+                "data":sessionData.usage['avg-duration-per-session'],
+                "id":"draw-time-spent",
+                "help":"dashboard.avg-time-spent2"
+            },
+            {
+                //"title":jQuery.i18n.map["dashboard.avg-reqs-received"],
+                "title":"avg-reqs-received",
+                "data":sessionData.usage['avg-events'],
+                "id":"draw-avg-events-served",
+                "help":"dashboard.avg-reqs-received"
+            }
+        ];
+	
+	sessionData['bars'] = 
+	    [
 		{
 		    'title': 'bar01',
 		    'data': {},
@@ -165,17 +285,20 @@ window.DashboardView = manaView.extend({
 		    'data': {},
 		    'help': ''
 		}
-	    ]
-	};
+	    ];
+
 
 	this.templateData = sessionData;
-	$(this.el).html(this.template(this.templateData));
-	$(this.selectedView).parents('.big-numbers').addClass('active');
 
-	this.pageScript();
+
+	if (!isRefresh) {
+	    $(this.el).html(this.template(this.templateData));
+	    $(this.selectedView).parents('.big-numbers').addClass('active');
+	    this.pageScript();
+	}
     },
 
-    refresh: function (){
+    refresh: function (isFromIdle){
 	var self = this;
 
 	$.when(this.beforeRender()).then(function(){
@@ -183,12 +306,13 @@ window.DashboardView = manaView.extend({
 		return false;
 	    }
 	    
-	    self.renderCommon(true);
+	    self.renderCommon(true);  // should set (true), set (false, true) temporarily
+	    //self.renderCommon(false, true);
 
 	    newPage = $('<div>'+self.template(self.templateData)+'</div>');
-	    $('#big-number-container').replacewith(newPage.find('#big-number-container'));
-	    $('.dashboard-summary').replacewith(newPage.find('.dashboard-summary'));
-	    $('.widget-header .title').replacewith(newPage.find('.widget-header .title'));
+	    $('#big-number-container').replaceWith(newPage.find('#big-number-container'));
+	    $('.dashboard-summary').replaceWith(newPage.find('.dashboard-summary'));
+	    $('.widget-header .title').replaceWith(newPage.find('.widget-header .title'));
 	    $(self.selectedView).parents('.big-numbers').addClass('active');
 
 	    switch(self.selectedView){
@@ -225,6 +349,8 @@ var AppRouter = Backbone.Router.extend({
 
     routes: {
 	"dash/": "dashboard",
+	"/manage/apps": "manageApps",
+
 	"*path": "main"
     },
 
@@ -244,6 +370,11 @@ var AppRouter = Backbone.Router.extend({
 	this.renderWhenReady(this.dashboardView);
     },
 
+    manageApps: function() {
+
+	this.renderWhenReady(this.manageAppsView);
+    },
+
     renderWhenReady: function(viewName){
 	
 	if (this.activeView) {
@@ -251,17 +382,25 @@ var AppRouter = Backbone.Router.extend({
 	}
 
 	this.activeView = viewName;
-	//clearInterval(this.refreshActiveView);
+	clearInterval(this.refreshActiveView);
+
+	/* if variable "manaGlobal" is empty, redirect to page /manage/apps straightly 
+	if (_.isEmpty(manaGlobal['app'])) {
+	    if (Backbone.history.fragment != '/manage/apps') {
+		this.navigate('/manage/apps', true);
+	    } else {
+		viewName.render();
+	    }
+	    return false;
+	}
+	*/
 
 	viewName.render();
 
-
-	/*
 	var self = this;
 	this.refreshActiveView = setInterval(function (){
 	    self.activeView.refresh();
-	}, 1000);
-	*/
+	}, manaCommon.DASHBOARD_REFRESH_MS);
     },
 
     
@@ -269,13 +408,55 @@ var AppRouter = Backbone.Router.extend({
 
 	// initialize the dashboard, register helpers etc.
 	this.dashboardView = new DashboardView();
+
+	Handlebars.registerPartial('date-selector', $('#template-date-selector').html());
+
     },
     
     pageScript: function(){
+        $("#month").text(moment().format('YYYY'));
+        $("#hour").text('Today');
+        $("#7days").text('7 Days');
+        $("#30days").text('30 Days');
+        $("#60days").text('60 Days');
 
 	var self = this;
-
 	$(document).ready(function() {
+	    
+            var selectedDateID = manaCommon.getPeriod();
+
+            if (Object.prototype.toString.call(selectedDateID) !== '[object Array]') {
+                $("#" + selectedDateID).addClass("active");
+            }	    
+
+            $(".usparkline").peity("bar", { width:"100%", height:"30", colour:"#6BB96E", strokeColour:"#6BB96E", strokeWidth:2 });
+            $(".dsparkline").peity("bar", { width:"100%", height:"30", colour:"#C94C4C", strokeColour:"#C94C4C", strokeWidth:2 });
+
+            $("#date-selector").find(">.button").click(function () {
+                if ($(this).hasClass("selected")) {
+                    return true;
+                }
+
+                self.dateFromSelected = null;
+                self.dateToSelected = null;
+
+                $(".date-selector").removeClass("selected").removeClass("active");
+                $(this).addClass("selected");
+                var selectedPeriod = $(this).attr("id");
+
+                if (manaCommon.getPeriod() == selectedPeriod) {
+                    return true;
+                }
+
+                manaCommon.setPeriod(selectedPeriod);
+
+                self.activeView.dateChanged();
+                $("#" + selectedPeriod).addClass("active");
+                self.pageScript();
+            });
+
+
+	    
 
 	});
     }
