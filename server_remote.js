@@ -2,11 +2,10 @@
 //  OpenShift sample Node application
 var express = require('express'),
     fs      = require('fs'),
-
    //  user-added modules
     http    = require('http'),
     path    = require('path'),
-    argv    = require('optimist').argv,    // py-argparse alike
+    //  argv    = require('optimist').argv,    // py-argparse alike
     request = require('request'),       // simple way to make http calls. support https and redirects by default.
     configs = require('./configs.js'),
     webauth = require('everyauth'),
@@ -124,7 +123,8 @@ var Mana = function() {
 
 	// How we pass our websocket URL to the client.
 	self.routes['/varSocketURI.js'] = function(req, res) {
-	    var port = argv['websocket-port'];
+	    //var port = argv['websocket-port'];
+	    var port = configs.websocket.port;
 	    // Modify the URI only if we pass an optional connection port in.
 	    var socketURI = port ? ':'+port+'/' : '/';
 	    res.set('Content-Type', 'text/javascript');
@@ -297,7 +297,7 @@ var Mana = function() {
 		if (user.pass !== pass) return ['Login failed'];
 		return user;
 	    })
-	    .loginSuccessRedirect('/login')
+	    .loginSuccessRedirect('/dashboard')
 	    /*
 	    .respondToLoginSucceed( function (res, user, data) {
 		if (user) {
@@ -335,9 +335,7 @@ var Mana = function() {
         //  Start the app on the specific interface (and port).
 	self.serv = http.createServer(self.app);
 	self.sio = require('socket.io').listen(self.serv);
-	console.log( "%s: *** ABOUT Socket.IO DEBUG MODE since *>=1.0:***\n" +
-		     "\tThe best way to see what information is available is to use the command:" +
-		     "'DEBUG=* node yourfile.js'", Date(Date.now()) );
+	console.log( "%s: *** Socket.io is listening ***\n", Date(Date.now()) );
 
 	self.serv.listen( self.port, self.ipaddress, function() {
 	    console.log( '%s: Server is listening on %s:%d ...', 

@@ -21,8 +21,7 @@ a:active { color:inherit; }
 #sidebar-top { height:112px; padding-top:11px; 
 	       background-image:url('/images/dashboard/logo_bg.png'); }
 
-/* sidebar-logo { background-image:url('/images/dashboard/logo.png'); width:144px; height:44px; margin:0 auto; } */
-#sidebar-logo { background-image:url('/images/dashboard/taiwan.png'); width:144px; height:44px; margin:0 auto; } 
+#sidebar-logo { background-image:url('/images/dashboard/logo.png'); width:144px; height:44px; margin:0 auto; } 
 #sidebar-app-select { width:170px; height:16px; padding:10px; 
 		      background-image:url('/images/dashboard/combobox.png'); 
 		      margin:0 auto; margin-top:21px; cursor:pointer; }

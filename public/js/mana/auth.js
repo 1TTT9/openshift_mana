@@ -1,7 +1,7 @@
 var user = null, pass = null;
 
 
-var a = "http://127.0.0.1:8080/dashboard";
+var a = "";
 
 window.onload = function() {
 
@@ -32,10 +32,11 @@ window.onload = function() {
 	}
     } );
 
+    /*
     if ( $('#aaaa') ) {
 	setTimeout( function(){
 	    window.location.href = a;
-	   //$(window).load(a);
 	}, 5000);
     }
+    */
 }

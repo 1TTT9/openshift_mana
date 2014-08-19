@@ -24,7 +24,7 @@ manaGraph.drawTimeGraph = function (dataPoints, container, bucket) {
         },
         grid:{ hoverable:true, borderColor:"null", color:"#BDBDBD", borderWidth:0, minBorderMargin:10, labelMargin:10},
         xaxis:{ tickDecimals:"number", tickSize:0, tickLength:0 },
-        yaxis:{ min:0, minTickSize:1, tickDecimals:"number", ticks:3 },
+        yaxis:{ tickDecimals:"number", min:0, minTickSize:1, ticks:3 },
         legend:{ show:false, margin:[-25, -44], noColumns:3, backgroundOpacity:0 },
         colors: manaGraph.GRAPH_COLORS
     };
@@ -45,7 +45,23 @@ manaGraph.drawTimeGraph = function (dataPoints, container, bucket) {
     graphProperties.xaxis.ticks = tickObj.ticks;
 
     graphTicks = tickObj.tickTexts;
+    /* [Flot]
 
+       var plot = $.plot(placeholder, data, options)  //Example
+       ------------------------------------------------------------   
+       'placeholder': a jQuery object or DOM element or jQuery expression that the plot will be put into. 
+       This placeholder needs to have its width and height set as explained in the README 
+       (go read that now if you haven't, it's short). 
+       The plot will modify some properties of the placeholder so it's recommended you simply pass in a div 
+       that you don't use for anything else. 
+       Make sure you check any fancy styling you apply to the div, e.g. 
+       background images have been reported to be a problem on IE 7.
+
+       'data': [ [x1, y1], [x2, y2], ... ]
+       E.g. [ [1, 3], [2, 14.01], [3.5, 3.14] ]
+       Note that to simplify the internal logic in Flot both the x and y values must be numbers 
+
+     */
     var graphObj = $.plot($(container), dataPoints, graphProperties),
     keyEventCounter = "A",
     keyEvents = [],
@@ -115,6 +131,7 @@ manaGraph.drawTimeGraph = function (dataPoints, container, bucket) {
     var graphWidth = graphObj.width();
 
     for (var k = 0; k < keyEvents.length; k++) {
+
         var bgColor = graphObj.getData()[k].color;
 
         if (!keyEvents[k]) {
@@ -153,9 +170,15 @@ manaGraph.drawTimeGraph = function (dataPoints, container, bucket) {
         }
     }
 
+    /*
+    $(container).bind("plotclick", function (event, pos, item) {
+    });
+    */
+
     var previousPoint;
 
     $(container).bind("plothover", function (event, pos, item) {
+
         if (item) {
             if (previousPoint != item.dataIndex) {
                 previousPoint = item.dataIndex;
@@ -164,7 +187,7 @@ manaGraph.drawTimeGraph = function (dataPoints, container, bucket) {
                 var x = item.datapoint[0].toFixed(1).replace(".0", ""),
                 y = item.datapoint[1].toFixed(1).replace(".0", "");
 
-                showTooltip(item.pageX, item.pageY - 40, y + " " + item.series.label);
+                manaCommon.showTooltip(item.pageX, item.pageY - 40, y + " " + item.series.label);
             }
         } else {
             $("#graph-tooltip").remove();

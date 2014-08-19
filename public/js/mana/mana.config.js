@@ -20,7 +20,7 @@ manaCommon.API_PARTS = {
 manaCommon.ACTIVE_APP_KEY = 0;
 
 
-manaCommon.DASHBOARD_REFRESH_MS = 1 * 1000;
+manaCommon.DASHBOARD_REFRESH_MS = 10 * 1000;
 manaCommon.DASHBOARD_IDLE_MS = 3000 * 1000;
 /* manaCommon END */
 

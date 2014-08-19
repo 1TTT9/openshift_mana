@@ -17,7 +17,7 @@ var manaView = Backbone.View.extend( {
     },
 
     dateChanged: function (){
-	this.renderComon();
+	this.renderCommon();
     },
 
     /*  appChanged here */
@@ -35,16 +35,19 @@ var manaView = Backbone.View.extend( {
 	$('#content-top').html("");
 	$(this.el).html('<div id="content-loader"></div>');
 
-	this.renderCommon();
-	this.afterRender();
-	app.pageScript();
+        var self = this;
+        //$.when(this.beforeRender(), initializeEventsOnce()).then(function() {
+        $.when(this.beforeRender()).then(function() {
+            self.renderCommon();
+            self.afterRender();
+            app.pageScript();
+        });
 
 	return this;
     },
     
-    renderCommon: function (){
-	//pass
-    },
+    renderCommon:function (isRefresh) {
+    }, // common render function of the view
 
     refresh: function (){
 	return true;
@@ -70,6 +73,30 @@ var manaView = Backbone.View.extend( {
 /* Helper funciton END */
 
 /* fillKeyEvents funciton */
+function fillKeyEvents(keyEvents) {
+    if (!keyEvents.length) {
+        return true;
+    }
+
+    $("#key-events").html("");
+    for (var k = 0; k < keyEvents.length; k++) {
+
+        if (!keyEvents[k]) {
+            continue;
+        }
+
+        for (var l = 0; l < keyEvents[k].length; l++) {
+            $("#key-events").append("<tr>\
+<td>\
+<div class='graph-key-event-label' style='float:left; background-color:" + keyEvents[k][l].color + ";'>" + keyEvents[k][l].code + "</div>\
+<div style='margin-left:40px; padding-top:3px;'>" + keyEvents[k][l].desc + "</div>\
+</td>\
+</tr>");
+        }
+    }
+}
+
+
 /* fillKeyEvents funciton END */
 
 window.manageAppsView = manaView.extend({
@@ -175,7 +202,7 @@ window.DashboardView = manaView.extend({
 
     beforeRender: function (){
 	//initialize some prerequisites (sessions, locations, device, etc.) before render
-	return $.when().then(function(){});
+	return $.when( manaSession.initialize() ).then(function(){});
     },
 
     afterRender: function (){
@@ -187,19 +214,113 @@ window.DashboardView = manaView.extend({
 	this.renderCommon(false, true);
 	
 	switch (this.selectedView) {
-        case "#draw-total-sessions":
-            _.defer(function () {
-                sessionDP = manaSession.getSessionDPTotal();
-                manaGraph.drawTimeGraph(sessionDP.chartDP, "#dashboard-graph");
-		//alert('lalala2');
-            });
-            break;
+            case "#draw-total-sessions":
+	        /* defer: setTimeout similar function */
+                _.defer(function () {
+                    sessionDP = manaSession.getSessionDPTotal();
+                    manaGraph.drawTimeGraph(sessionDP.chartDP, "#dashboard-graph");
+		    //alert('lalala2');
+		});
+                break;
+            case "#draw-new-users":
+                _.defer(function () {
+                    sessionDP = manaSession.getUserDPNew();
+                    manaGraph.drawTimeGraph(sessionDP.chartDP, "#dashboard-graph");
+                });
+                break;
+            case "#draw-total-users":
+                _.defer(function () {
+                    sessionDP = manaSession.getUserDPActive();
+                    manaGraph.drawTimeGraph(sessionDP.chartDP, "#dashboard-graph");
+                });
+                break;
+            case "#draw-time-spent":
+                _.defer(function () {
+                    sessionDP = manaSession.getDurationDPAvg();
+                    manaGraph.drawTimeGraph(sessionDP.chartDP, "#dashboard-graph");
+                });
+                break;
+            case "#draw-total-time-spent":
+                _.defer(function () {
+                    sessionDP = manaSession.getDurationDP();
+                    manaGraph.drawTimeGraph(sessionDP.chartDP, "#dashboard-graph");
+                });
+                break;
+            case "#draw-avg-events-served":
+                _.defer(function () {
+                    sessionDP = manaSession.getEventsDPAvg();
+                    manaGraph.drawTimeGraph(sessionDP.chartDP, "#dashboard-graph");
+                });
+                break;
+
 	}
     },
 
     pageScript: function (){
 
-	//$('.widget-content .inner').click(function(){});
+        $(".widget-content .inner").click( function () {
+            $(".big-numbers").removeClass("active");
+            $(".big-numbers .select").removeClass("selected");
+            $(this).parent(".big-numbers").addClass("active");
+            $(this).find('.select').addClass("selected");
+        });
+
+        var self = this;
+        $(".big-numbers .inner").click(function () {
+            var elID = $(this).find('.select').attr("id");
+
+            if (self.selectedView == "#" + elID) {
+                return true;
+            }
+
+            self.selectedView = "#" + elID;
+
+            var keyEvents;
+
+            switch (elID) {
+                case "draw-total-users":
+                    _.defer(function () {
+                        sessionDP = manaSession.getUserDPActive();
+                        keyEvents = manaGraph.drawTimeGraph(sessionDP.chartDP, "#dashboard-graph");
+                        fillKeyEvents(keyEvents);
+                    });
+                    break;
+                case "draw-new-users":
+                    _.defer(function () {
+                        sessionDP = manaSession.getUserDPNew();
+                        keyEvents = manaGraph.drawTimeGraph(sessionDP.chartDP, "#dashboard-graph");
+                        fillKeyEvents(keyEvents);
+                    });
+                    break;
+                case "draw-total-sessions":
+                    _.defer(function () {
+                        sessionDP = manaSession.getSessionDPTotal();
+                        keyEvents = manaGraph.drawTimeGraph(sessionDP.chartDP, "#dashboard-graph");
+                        fillKeyEvents(keyEvents);
+                    });
+                    break;
+                case "draw-time-spent":
+                    _.defer(function () {
+                        sessionDP = manaSession.getDurationDPAvg();
+                        keyEvents = manaGraph.drawTimeGraph(sessionDP.chartDP, "#dashboard-graph");
+                        fillKeyEvents(keyEvents);
+                    });
+                    break;
+                case "draw-total-time-spent":
+                    _.defer(function () {
+                        sessionDP = manaSession.getDurationDP();
+                        manaGraph.drawTimeGraph(sessionDP.chartDP, "#dashboard-graph");
+                    });
+                    break;
+                case "draw-avg-events-served":
+                    _.defer(function () {
+                        sessionDP = manaSession.getEventsDPAvg();
+                        manaGraph.drawTimeGraph(sessionDP.chartDP, "#dashboard-graph");
+                    });
+                    break;
+            }
+        });
+
     },
 
     /*  appChanged here */
@@ -207,9 +328,9 @@ window.DashboardView = manaView.extend({
     
     renderCommon: function (isRefresh, isDateChange){
 
-        var sessionData = manaSession.getSessionData();
+        var sessionData = manaSession.getSessionData(),
+            sessionDP = manaSession.getSessionDPTotal();
             //locationData = manaLocation.getLocationData({maxCountries:7}),
-            //sessionDP = manaSession.getSessionDPTotal();
 
         //sessionData["country-data"] = locationData;
         //sessionData["page-title"] = manaCommon.getDateRange();
@@ -217,6 +338,8 @@ window.DashboardView = manaView.extend({
 	/* Deprecation warning: moment.lang is deprecated. Use moment.locale instead. */
 	moment.locale('ja');
         sessionData["page-title"] = moment().format('lll') + moment().format('ss秒 (dd)') ;
+
+	sessionData["page-title"] += ' . . . ”' + (this.selectedView).substring(1) + '” is now selected.';
 
         sessionData["usage"] = [
             {
@@ -290,43 +413,69 @@ window.DashboardView = manaView.extend({
 
 	this.templateData = sessionData;
 
-
 	if (!isRefresh) {
 	    $(this.el).html(this.template(this.templateData));
-	    $(this.selectedView).parents('.big-numbers').addClass('active');
+	    $(this.selectedView).parents(".big-numbers").addClass('active');
 	    this.pageScript();
+
+            if (!isDateChange) {
+                var keyEvents = manaGraph.drawTimeGraph(sessionDP.chartDP, "#dashboard-graph");
+                fillKeyEvents(keyEvents);
+            }
 	}
     },
 
     refresh: function (isFromIdle){
-	var self = this;
 
-	$.when(this.beforeRender()).then(function(){
+	var self = this;
+	$.when(this.beforeRender()).then(function() {
+
 	    if (app.activeView != self) {
 		return false;
-	    }
-	    
-	    self.renderCommon(true);  // should set (true), set (false, true) temporarily
-	    //self.renderCommon(false, true);
+	    }	    
+	    self.renderCommon(true);
 
-	    newPage = $('<div>'+self.template(self.templateData)+'</div>');
-	    $('#big-number-container').replaceWith(newPage.find('#big-number-container'));
-	    $('.dashboard-summary').replaceWith(newPage.find('.dashboard-summary'));
-	    $('.widget-header .title').replaceWith(newPage.find('.widget-header .title'));
-	    $(self.selectedView).parents('.big-numbers').addClass('active');
+            newPage = $("<div>" + self.template(self.templateData) + "</div>");
+            $("#big-numbers-container").replaceWith(newPage.find("#big-numbers-container"));
+            $(".dashboard-summary").replaceWith(newPage.find(".dashboard-summary"));
+            $(".widget-header .title").replaceWith(newPage.find(".widget-header .title"));
+            $(self.selectedView).parents(".big-numbers").addClass("active");
 
 	    switch(self.selectedView){
-		//pass
+                case "#draw-total-sessions":
+                    sessionDP = manaSession.getSessionDPTotal();
+                    manaGraph.drawTimeGraph(sessionDP.chartDP, "#dashboard-graph");
+                    break;
+                case "#draw-total-users":
+                    sessionDP = manaSession.getUserDPActive();
+                    manaGraph.drawTimeGraph(sessionDP.chartDP, "#dashboard-graph");
+                    break;
+                case "#draw-new-users":
+                    sessionDP = manaSession.getUserDPNew();
+                    manaGraph.drawTimeGraph(sessionDP.chartDP, "#dashboard-graph");
+                    break;
+                case "#draw-time-spent":
+                    sessionDP = manaSession.getDurationDPAvg();
+                    manaGraph.drawTimeGraph(sessionDP.chartDP, "#dashboard-graph");
+                    break;
+                case "#draw-total-time-spent":
+                    sessionDP = manaSession.getDurationDP();
+                    manaGraph.drawTimeGraph(sessionDP.chartDP, "#dashboard-graph");
+                    break;
+                case "#draw-avg-events-served":
+                    sessionDP = manaSession.getEventsDPAvg();
+                    manaGraph.drawTimeGraph(sessionDP.chartDP, "#dashboard-graph");
+                    break;
 	    }
 	    
 	    if(newPage.find('#map-list-right').length == 0){
 		$('#map-list-right').remove();
 	    }
 
-	    if(newPage.find('#map-list-right').length){
-		$('#map-list-right').replacewith(newPage.find('#map-list-right'));
+	    if($('#map-list-right').length) {
+		$('#map-list-right').replaceWith(newPage.find('#map-list-right'));
 	    } else {
-		$('#map-list-right').prepend(newPage.find('#map-list-right'));
+		$('.widget.map-list').prepend(newPage.find('#map-list-right'));
 	    }
 	   
 	    self.pageScript();	 
@@ -413,7 +562,8 @@ var AppRouter = Backbone.Router.extend({
 
     },
     
-    pageScript: function(){
+    pageScript: function() {
+
         $("#month").text(moment().format('YYYY'));
         $("#hour").text('Today');
         $("#7days").text('7 Days');
@@ -427,16 +577,19 @@ var AppRouter = Backbone.Router.extend({
 
             if (Object.prototype.toString.call(selectedDateID) !== '[object Array]') {
                 $("#" + selectedDateID).addClass("active");
-            }	    
+            }
 
-            $(".usparkline").peity("bar", { width:"100%", height:"30", colour:"#6BB96E", strokeColour:"#6BB96E", strokeWidth:2 });
-            $(".dsparkline").peity("bar", { width:"100%", height:"30", colour:"#C94C4C", strokeColour:"#C94C4C", strokeWidth:2 });
+            $(".usparkline").peity("bar", { width:"100%", height:"30", colour:"#6BB96E", 
+					    strokeColour:"#6BB96E", strokeWidth:2 });
+            $(".dsparkline").peity("bar", { width:"100%", height:"30", colour:"#C94C4C", 
+					    strokeColour:"#C94C4C", strokeWidth:2 });
 
+	    /* this works when user clicks the date buttons  */
             $("#date-selector").find(">.button").click(function () {
                 if ($(this).hasClass("selected")) {
                     return true;
                 }
-
+		
                 self.dateFromSelected = null;
                 self.dateToSelected = null;
 
@@ -454,9 +607,6 @@ var AppRouter = Backbone.Router.extend({
                 $("#" + selectedPeriod).addClass("active");
                 self.pageScript();
             });
-
-
-	    
 
 	});
     }

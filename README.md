@@ -6,6 +6,22 @@ Prerequisites: Node(.js), Express, Jade, Backbone(.js), jQuery(.js)
 
 ## Records 
 
+### 2014.08.19
+
+# As the source codes released by Countly is under AGPLv3, all modifications should be opened and published under the same license publicly. See the [official website](https://count.ly/resources/faq/licencing) for more details.
+
+1) modified 'propertiesValue' and session Objects.
+
+2) Faciliate with Flot for data visualization inside Countly.
+
+- TO-DO-NEXT
+
+1. mongodb built-up and write-in
+
+2. Complete sessionObject
+
+3. Complete date-selectorObject
+
 ### 2014.08.02 
 
 1) Using Jade template engine to replace original html files.

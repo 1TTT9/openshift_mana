@@ -3,13 +3,16 @@ html
   head
     meta(charset='utf-8')
     title #{locals.title}
+
     script(type='text/javascript', src='/js/utils/jquery.min.js')
+    script(type='text/javascript', src='/js/utils/jquery.i18n.properties-min.js')
     script(type='text/javascript', src='/js/utils/moment.min.js')
     script(type='text/javascript', src='/js/utils/moment+locales.min.js')
     script(type='text/javascript', src='/js/utils/store+json2.min.js')
     script(type='text/javascript', src='/js/utils/underscore-min.js')
     script(type='text/javascript', src='/js/utils/backbone-min.js')
     script(type='text/javascript', src='/js/utils/handlebars.js')
+    script(type='text/javascript', src='/js/dom/jquery.tipsy.js')
 
     script(language='javascript', type='text/javascript', src='/js/visuo/jquery.peity.min.js')
     script(language='javascript', type='text/javascript', src='/js/visuo/flot/jquery.flot.js')
@@ -94,10 +97,10 @@ html
           .button-container
             #date-submit.cly-button-dark(style='float: right;', data-localize='common.apply')
         #month.button.date-selector
-        #hour.button.date-selector(data-localize='common.today')
-        #7days.button.date-selector(data-localize='common.7days')
-        #30days.button.date-selector(data-localize='common.30days')
-        #60days.button.date-selector(data-localize='common.60days')
+        #hour.button.date-selector
+        #7days.button.date-selector
+        #30days.button.date-selector
+        #60days.button.date-selector
 
 
     Script#dashboard-template(type='text/x-handlebars-template')
@@ -115,8 +118,11 @@ html
                   | {{this.data.total}}
                 .trend(style="background-image:url('/images/dashboard/{{this.data.trend}}trend.png');")
                   .change  {{this.data.change}}
-                .select
-                  .title  {{this.title}}
+                .spark
+                  //span(class="{{this.data.trend}}sparkline")  {{this.data.sparkline}}
+                  span(class="{{this.data.trend}}sparkline")
+                div(id="{{this.id}}").select
+                  .title {{this.title}}
                 .arrow
             | {{/each}}
         .widget-footer(style='height:220px; padding-top:20px; padding-bottom:10px; overflow:visible; box-shadow:none;')
@@ -127,7 +133,15 @@ html
         .item.help-zone-vs(data-help-localize='{{this.help}}')
           .inner
             .title  {{this.title}}
+            | {{#if this.data}}
+            .bar
+              | {{#each this.data}}
+              .bar-inner(style="width:{{this.percent}}%;" data-item="{{this.name}}")
+              | {{/each}}
+            .number(data-item="{{this.data.0.name}}")  {{this.data.0.name}}
+            | {{else}}
             .no-data(data-localize='common.bar.no-data')
+            | {{/if}}
         | {{/each}}
       .widget.map-list.help-zone-vb
         | {{#if country-data}}
@@ -142,8 +156,8 @@ html
         #geo-char-outer
 
     Script(type='text/javascript', src='/js/mana/mana.config.js')
-    Script(type='text/javascript', src='/js/mana/mana.graph.js')    
     Script(type='text/javascript', src='/js/mana/mana.common.js')
     Script(type='text/javascript', src='/js/mana/mana.session.js')
+    Script(type='text/javascript', src='/js/mana/mana.graph.js')    
     Script(type='text/javascript', src='/js/mana/template.js')
     link(rel='stylesheet', href='/styl/dashboard.css')

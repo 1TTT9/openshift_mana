@@ -1,21 +1,56 @@
 (function (manaSession) {
 
-function getRandom(len) {
-    var text = "", possible = "0123456789";
-
-    text += possible.charAt(Math.floor(Math.random() * possible.length)+1);
-
-    for( var i=0; i < len; i++ ) text += possible.charAt(Math.floor(Math.random() * possible.length));
-    return parseInt(text);
-}
-
-
 //Private Properties
 var _periodObj = {},
     _sessionDb = {},
     _durations = [],
     _activeAppKey = 0,
     _initialized = false;
+
+//Private Methods
+function calcSparklineData() {
+
+    var sparkLines = {"total":[], "nev":[], "unique":[], "returning":[], "total-time":[], "avg-time":[], "events":[], "avg-events":[]};
+
+    if (!_periodObj.isSpecialPeriod) {
+        for (var i = _periodObj.periodMin; i < (_periodObj.periodMax + 1); i++) {
+            var tmp_x = manaCommon.getDescendantProp(_sessionDb, _periodObj.activePeriod + "." + i);
+            tmp_x = manaSession.clearSessionObject(tmp_x);
+
+            sparkLines["total"][sparkLines["total"].length] = tmp_x["t"];
+            sparkLines["nev"][sparkLines["nev"].length] = tmp_x["n"];
+            sparkLines["unique"][sparkLines["unique"].length] = tmp_x["u"];
+            sparkLines["returning"][sparkLines["returning"].length] = (tmp_x["t"] - tmp_x["n"]);
+            sparkLines["total-time"][sparkLines["total-time"].length] = tmp_x["d"];
+            sparkLines["avg-time"][sparkLines["avg-time"].length] = (tmp_x["t"] == 0) ? 0 : (tmp_x["d"] / tmp_x["t"]);
+            sparkLines["events"][sparkLines["events"].length] = tmp_x["e"];
+            sparkLines["avg-events"][sparkLines["avg-events"].length] = (tmp_x["u"] == 0) ? 0 : (tmp_x["e"] / tmp_x["u"]);
+        }
+    } else {
+        for (var i = 0; i < (_periodObj.currentPeriodArr.length); i++) {
+            var tmp_x = manaCommon.getDescendantProp(_sessionDb, _periodObj.currentPeriodArr[i]);
+            tmp_x = manaSession.clearSessionObject(tmp_x);
+
+            sparkLines["total"][sparkLines["total"].length] = tmp_x["t"];
+            sparkLines["nev"][sparkLines["nev"].length] = tmp_x["n"];
+            sparkLines["unique"][sparkLines["unique"].length] = tmp_x["u"];
+            sparkLines["returning"][sparkLines["returning"].length] = (tmp_x["t"] - tmp_x["n"]);
+            sparkLines["total-time"][sparkLines["total-time"].length] = tmp_x["d"];
+            sparkLines["avg-time"][sparkLines["avg-time"].length] = (tmp_x["t"] == 0) ? 0 : (tmp_x["d"] / tmp_x["t"]);
+            sparkLines["events"][sparkLines["events"].length] = tmp_x["e"];
+            sparkLines["avg-events"][sparkLines["avg-events"].length] = (tmp_x["u"] == 0) ? 0 : (tmp_x["e"] / tmp_x["u"]);
+        }
+    }
+
+    for (var key in sparkLines) {
+        sparkLines[key] = sparkLines[key].join(",");
+    }
+
+    return sparkLines;
+}
+
+
+
 
 
 //Public Methods
@@ -98,7 +133,6 @@ manaSession.getSessionData = function () {
     previousEvents = 0,
     isEstimate = false;
 
-    /*
     if (_periodObj.isSpecialPeriod) {
 
         isEstimate = true;
@@ -158,7 +192,6 @@ manaSession.getSessionData = function () {
         }
 
     } else {
-
         tmp_x = manaCommon.getDescendantProp(_sessionDb, _periodObj.activePeriod);
         tmp_y = manaCommon.getDescendantProp(_sessionDb, _periodObj.previousPeriod);
         tmp_x = manaSession.clearSessionObject(tmp_x);
@@ -176,7 +209,6 @@ manaSession.getSessionData = function () {
         currentEvents = tmp_x["e"];
         previousEvents = tmp_y["e"];
     }
-    */
     
     var sessionDuration = (currentDuration / 60),
         previousSessionDuration = (previousDuration / 60),
@@ -191,22 +223,19 @@ manaSession.getSessionData = function () {
         changeUnique          = manaCommon.getPercentChange(previousUnique, currentUnique),
         changeReturning       = manaCommon.getPercentChange((previousUnique - previousNew), (currentNew - currentNew)),
         changeEvents          = manaCommon.getPercentChange(previousEvents, currentEvents),
-        changeEventsPerUser   = manaCommon.getPercentChange(previousEventsPerUser, eventsPerUser);
-        //sparkLines = calcSparklineData();
+        changeEventsPerUser   = manaCommon.getPercentChange(previousEventsPerUser, eventsPerUser),
+        sparkLines = calcSparklineData();
 
-    /*
-    var timeSpentString = (sessionDuration.toFixed(1)) + " " + jQuery.i18n.map["common.minute.abrv"];
+
+    var timeSpentString = (sessionDuration.toFixed(1)) + " ";
 
     if (sessionDuration >= 142560) {
-        timeSpentString = (sessionDuration / 525600).toFixed(1) + " " + jQuery.i18n.map["common.year.abrv"];
+        timeSpentString = (sessionDuration / 525600).toFixed(1) + " ";
     } else if (sessionDuration >= 1440) {
-        timeSpentString = (sessionDuration / 1440).toFixed(1) + " " + jQuery.i18n.map["common.day.abrv"];
+        timeSpentString = (sessionDuration / 1440).toFixed(1) + " ";
     } else if (sessionDuration >= 60) {
-        timeSpentString = (sessionDuration / 60).toFixed(1) + " " + jQuery.i18n.map["common.hour.abrv"];
+        timeSpentString = (sessionDuration / 60).toFixed(1) + " ";
     }
-    */
-
-    var timeSpentString = '10.0';
 
     dataArr = {
 
@@ -215,51 +244,51 @@ manaSession.getSessionData = function () {
                 "total":currentTotal,
                 "change":changeTotal.percent,
                 "trend":changeTotal.trend,
-		//"sparkline":sparkLines.total
+		"sparkline":sparkLines.total
                 },
             "total-users":{
                 "total":currentUnique,
                 "change":changeUnique.percent,
                 "trend":changeUnique.trend,
-                //"sparkline":sparkLines.unique,
+                "sparkline":sparkLines.unique,
                 //"isEstimate":isEstimate
             },
             "new-users":{
                 "total":currentNew,
                 "change":changeNew.percent,
                 "trend":changeNew.trend,
-		//"sparkline":sparkLines.nev
+		"sparkline":sparkLines.nev
             },
             "returning-users":{
                 "total":(currentUnique - currentNew),
                 "change":changeReturning.percent,
                 "trend":changeReturning.trend,
-                //"sparkline":sparkLines.returning
+                "sparkline":sparkLines.returning
             },
             "total-duration":{
                 "total":timeSpentString,
                 "change":changeDuration.percent,
                 "trend":changeDuration.trend,
-		//"sparkline":sparkLines["total-time"]
+		"sparkline":sparkLines["total-time"]
             },
             "avg-duration-per-session":{
 		//"total":(durationPerUser.toFixed(1)) + " " + jQuery.i18n.map["common.minute.abrv"],
                 "total":(durationPerUser.toFixed(1)),
                 "change":changeDurationPerUser.percent,
                 "trend":changeDurationPerUser.trend,
-		//"sparkline":sparkLines["avg-time"]
+		"sparkline":sparkLines["avg-time"]
             },
             "events":{
                 "total":currentEvents,
                 "change":changeEvents.percent,
                 "trend":changeEvents.trend,
-		//"sparkline":sparkLines["events"]
+		"sparkline":sparkLines["events"]
             },
             "avg-events":{
                 "total":eventsPerUser.toFixed(1),
                 "change":changeEventsPerUser.percent,
                 "trend":changeEventsPerUser.trend,
-		//"sparkline":sparkLines["avg-events"]
+		"sparkline":sparkLines["avg-events"]
             }
         }
     };
@@ -287,6 +316,134 @@ manaSession.getSessionDPTotal = function () {
     return manaCommon.extractChartData(_sessionDb, manaSession.clearSessionObject, chartData, dataProps);
 };
 
+
+manaSession.getUserDPNew = function () {
+
+    var chartData = [
+        //{ data:[], label:jQuery.i18n.map["common.table.new-users"], color:'#DDDDDD', mode:"ghost"},
+        //{ data:[], label:jQuery.i18n.map["common.table.new-users"], color:'#333933' }
+        { data:[], label:"new-users", color:'#DDDDDD', mode:"ghost" },
+        { data:[], label:"new-users", color:'#333933' }
+    ],
+    dataProps = [
+        {
+            name:"pn",
+            func:function (dataObj) { return dataObj["n"] },
+            period:"previous"
+        },
+        { name:"n" }
+    ];
+
+    return manaCommon.extractChartData(_sessionDb, manaSession.clearSessionObject, chartData, dataProps);
+};
+
+
+manaSession.getUserDPActive = function () {
+
+    var chartData = [
+        //{ data:[], label:jQuery.i18n.map["common.table.total-users"], color:'#DDDDDD', mode:"ghost" },
+        //{ data:[], label:jQuery.i18n.map["common.table.total-users"], color:'#333933' }
+        { data:[], label:"total-users", color:'#DDDDDD', mode:"ghost" },
+        { data:[], label:"total-users", color:'#333933' }
+    ],
+    dataProps = [
+        {
+            name:"pt",
+            func:function (dataObj) {
+                return dataObj["u"]
+            },
+            period:"previous"
+        },
+        {
+            name:"t",
+            func:function (dataObj) {  return dataObj["u"] }
+        }
+    ];
+
+    return manaCommon.extractChartData(_sessionDb, manaSession.clearSessionObject, chartData, dataProps);
+};
+
+
+manaSession.getDurationDP = function () {
+
+    var chartData = [
+        //{ data:[], label:jQuery.i18n.map["common.graph.time-spent"], color:'#DDDDDD', mode:"ghost"},
+        //{ data:[], label:jQuery.i18n.map["common.graph.time-spent"], color:'#333933' }
+        { data:[], label:"time-spent", color:'#DDDDDD', mode:"ghost" },
+        { data:[], label:"time-spent", color:'#333933' }
+    ],
+    dataProps = [
+        {
+            name:"previous_t",
+            func:function (dataObj) {
+                return ((dataObj["d"] / 60).toFixed(1));
+            },
+            period:"previous"
+        },
+        {
+            name:"t",
+            func:function (dataObj) {
+                return ((dataObj["d"] / 60).toFixed(1));
+            }
+        }
+    ];
+
+    return manaCommon.extractChartData(_sessionDb, manaSession.clearSessionObject, chartData, dataProps);
+};
+
+manaSession.getDurationDPAvg = function () {
+
+    var chartData = [
+        //{ data:[], label:jQuery.i18n.map["common.graph.average-time"], color:'#DDDDDD', mode:"ghost"},
+        //{ data:[], label:jQuery.i18n.map["common.graph.average-time"], color:'#333933' }
+        { data:[], label:"average-time", color:'#DDDDDD', mode:"ghost" },
+        { data:[], label:"average-time", color:'#333933' }
+    ],
+    dataProps = [
+        {
+            name:"previous_average",
+            func:function (dataObj) {
+                return ((dataObj["t"] == 0) ? 0 : ((dataObj["d"] / dataObj["t"]) / 60).toFixed(1));
+            },
+            period:"previous"
+        },
+        {
+            name:"average",
+            func:function (dataObj) {
+                return ((dataObj["t"] == 0) ? 0 : ((dataObj["d"] / dataObj["t"]) / 60).toFixed(1));
+            }
+        }
+    ];
+
+    return manaCommon.extractChartData(_sessionDb, manaSession.clearSessionObject, chartData, dataProps);
+};
+
+manaSession.getEventsDPAvg = function () {
+
+    var chartData = [
+        //{ data:[], label:jQuery.i18n.map["common.graph.avg-reqs-received"], color:'#DDDDDD', mode:"ghost"},
+        //{ data:[], label:jQuery.i18n.map["common.graph.avg-reqs-received"], color:'#333933' }
+        { data:[], label:"avg-reqs", color:'#DDDDDD', mode:"ghost" },
+        { data:[], label:"avg-reqs", color:'#333933' }
+    ],
+    dataProps = [
+        {
+            name:"previous_average",
+            func:function (dataObj) {
+                return ((dataObj["u"] == 0) ? 0 : ((dataObj["e"] / dataObj["u"]).toFixed(1)));
+            },
+            period:"previous"
+        },
+        {
+            name:"average",
+            func:function (dataObj) {
+                return ((dataObj["u"] == 0) ? 0 : ((dataObj["e"] / dataObj["u"]).toFixed(1)));
+            }
+        }
+    ];
+
+    return manaCommon.extractChartData(_sessionDb, manaSession.clearSessionObject, chartData, dataProps);
+};
 
 
 })(window.manaSession = window.manaSession || {});

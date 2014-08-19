@@ -1,5 +1,19 @@
 (function (manaCommon) {
 
+function getRandom(nmin, nmax) {
+    var num = nmin + Math.floor(Math.random()*(nmax-nmin));
+    return parseInt(num);
+}
+
+function getfakedata(n){
+    var _fakedata = [];
+    for (var i=0;i<n;i++){
+	_fakedata.push(getRandom(100,300));
+    }
+    return _fakedata;
+}
+
+
 /* Private Properties */
 var _period = store.get("mana_date") || "hour";
 
@@ -352,7 +366,11 @@ manaCommon.extractChartData = function (db, clearFunction, chartData, dataProper
     activeDate,
     activeDateArr;
 
+
+    var _fakepropertyValue = [];
+
     for (var j = 0; j < propertyNames.length; j++) {
+
         if (currOrPrevious[j] === "previous") {
 
             if (manaCommon.periodObj.isSpecialPeriod) {
@@ -372,6 +390,12 @@ manaCommon.extractChartData = function (db, clearFunction, chartData, dataProper
                 activeDate = manaCommon.periodObj.activePeriod;
             }
         }
+
+	/* fake_data */
+	if (_fakepropertyValue.length == 0){
+	    _fakepropertyValue = getfakedata(periodMax);
+	}
+	/* fake_data END */
 
         for (var i = periodMin; i < periodMax; i++) {
             if (!manaCommon.periodObj.isSpecialPeriod) {
@@ -401,12 +425,15 @@ manaCommon.extractChartData = function (db, clearFunction, chartData, dataProper
             tableData[i]["date"] = formattedDate.format(manaCommon.periodObj.dateString);
 
             if (propertyFunctions[j]) {
-                propertyValue = propertyFunctions[j](dataObj);
+
+                propertyValue = propertyFunctions[j](dataObj);  //ghost data
             } else {
+
                 propertyValue = dataObj[propertyNames[j]];
             }
 
-            chartData[j]["data"][ chartData[j]["data"].length ] = [i, propertyValue];
+            //chartData[j]["data"][ chartData[j]["data"].length ] = [i, propertyValue];
+	    chartData[j]["data"][ chartData[j]["data"].length ] = [i, _fakepropertyValue[i]];  // fake_data
             tableData[i][ propertyNames[j] ] = propertyValue;
         }
     }
@@ -645,6 +672,29 @@ function clone(obj) {
     }
 }
 
+// Function to show the tooltip when any data point in the graph is hovered on.
+//function showTooltip(x, y, contents) {
+manaCommon.showTooltip = function(x, y, contents) {
+    var tooltip = '<div id="graph-tooltip">' + contents + '</div>';
+
+    $("#content").append("<div id='tooltip-calc'>" + tooltip + "</div>");
+    var widthVal = $("#graph-tooltip").outerWidth();
+    $("#tooltip-calc").remove();
+
+    var newLeft = (x - (widthVal / 2)),
+    xReach = (x + (widthVal / 2));
+
+    if (xReach > $(window).width()) {
+        newLeft = (x - widthVal);
+    } else if (xReach < 340) {
+        newLeft = x;
+    }
+
+    $(tooltip).css({
+        top:y,
+        left:newLeft
+    }).appendTo("body").fadeIn(200);
+}
 
 
 manaCommon.getTickObj = function(bucket) {
